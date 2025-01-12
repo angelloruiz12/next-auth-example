@@ -52,54 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   debug: !!process.env.AUTH_DEBUG,
   theme: { logo: "https://authjs.dev/img/logo-sm.png" },
   adapter: UnstorageAdapter(storage),
-  providers: [
-    Apple,
-    // Atlassian,
-    Auth0,
-    AzureB2C,
-    BankIDNorway,
-    BoxyHQSAML({
-      clientId: "dummy",
-      clientSecret: "dummy",
-      issuer: process.env.AUTH_BOXYHQ_SAML_ISSUER,
-    }),
-    Cognito,
-    Coinbase,
-    Discord,
-    Dropbox,
-    Facebook,
-    GitHub,
-    GitLab,
-    Google,
-    Hubspot,
-    Keycloak({ name: "Keycloak (bob/bob)" }),
-    LinkedIn,
-    MicrosoftEntraId,
-    Netlify,
-    Okta,
-    Passkey({
-      formFields: {
-        email: {
-          label: "Username",
-          required: true,
-          autocomplete: "username webauthn",
-        },
-      },
-    }),
-    Passage,
-    Pinterest,
-    Reddit,
-    Salesforce,
-    Slack,
-    Spotify,
-    Twitch,
-    Twitter,
-    Vipps({
-      issuer: "https://apitest.vipps.no/access-management-1.0/access/",
-    }),
-    WorkOS({ connection: process.env.AUTH_WORKOS_CONNECTION! }),
-    Zoom,
-  ],
+  providers: [GitHub({ clientId: process.env.AUTH_GITHUB_ID, clientSecret: process.env.AUTH_GITHUB_SECRET })],
   basePath: "/auth",
   session: { strategy: "jwt" },
   callbacks: {
@@ -120,6 +73,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       return session
     },
+    redirect({url, baseUrl}) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      if (new URL(url).origin === baseUrl) return url
+
+      return baseUrl
+    }
   },
   experimental: { enableWebAuthn: true },
 })
