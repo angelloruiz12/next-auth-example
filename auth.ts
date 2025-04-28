@@ -38,6 +38,16 @@ import memoryDriver from "unstorage/drivers/memory"
 import vercelKVDriver from "unstorage/drivers/vercel-kv"
 import { UnstorageAdapter } from "@auth/unstorage-adapter"
 
+import { DefaultSession } from "next-auth"
+
+declare module "next-auth" {
+  interface Session {
+    user?: {
+      role?: string;
+    } & DefaultSession["user"];
+  }
+}
+
 const storage = createStorage({
   driver: process.env.VERCEL
     ? vercelKVDriver({
@@ -69,8 +79,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token
     },
     async session({ session, token }) {
-      if (token?.accessToken) session.accessToken = token.accessToken
-
+      if (token?.accessToken) session.accessToken = token.accessToken;
+      session.user.role = session.user.email === "angelloruizlandauro12@gmail.com"?"admin": "user";
       return session
     },
     redirect({url, baseUrl}) {
